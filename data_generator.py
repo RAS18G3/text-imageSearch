@@ -182,58 +182,22 @@ class Data_generator:
                                           'pos_img': positive_img_batch, 'neg_img': negative_img_batch})
 
             
-            # Select top img and text losses, to put in to batch
-            img_batch_permutation = np.argsort(img_loss)[-self.training_samples_per_batch:]
-            
-            
             if BI_DIRECTIONAL:
-                text_batch_permutation = np.argsort(text_loss)[-self.training_samples_per_batch:]
-                
-                end = len(img_batch_permutation)//2
-                img_batch_permutation = img_batch_permutation[:end]
-                text_batch_permutation = text_batch_permutation[:end]
-                
-                # Select the firts part of the batch based on the top img loss examples
-                anchor_img_batch_1 = anchor_img_batch[img_batch_permutation]
-                positive_annotation_batch_1 = positive_annotation_batch[img_batch_permutation]
-                negative_annotation_batch_1 = negative_annotation_batch[img_batch_permutation]
-                
-                anchor_annotation_batch_1 = anchor_annotation_batch[img_batch_permutation]
-                positive_img_batch_1 = positive_img_batch[img_batch_permutation]
-                negative_img_batch_1 = negative_img_batch[img_batch_permutation]
-                
-                # Select the second part of the batch based on the top text loss examples
-                anchor_img_batch_2 = anchor_img_batch[text_batch_permutation]
-                positive_annotation_batch_2 = positive_annotation_batch[text_batch_permutation]
-                negative_annotation_batch_2 = negative_annotation_batch[text_batch_permutation]
+                # Sum the two losses
+                batch_loss = img_loss + text_loss
+            else: # If a single direction network is used the data should purely be selected based on img_loss
+                batch_loss = img_loss
 
-                anchor_annotation_batch_2 = anchor_annotation_batch[text_batch_permutation]
-                positive_img_batch_2 = positive_img_batch[text_batch_permutation]
-                negative_img_batch_2 = negative_img_batch[text_batch_permutation]
-                
-                # Concatinate the twoparts to make one batch
-                anchor_img_batch = np.concatenate((anchor_img_batch_1, anchor_img_batch_2))
-                positive_annotation_batch = np.concatenate((positive_annotation_batch_1, positive_annotation_batch_2))
-                negative_annotation_batch = np.concatenate((negative_annotation_batch_1, negative_annotation_batch_2))
-                
-                anchor_annotation_batch = np.concatenate((anchor_annotation_batch_1, anchor_annotation_batch_2))
-                positive_img_batch = np.concatenate((positive_img_batch_1, positive_img_batch_2))
-                negative_img_batch = np.concatenate((negative_img_batch_1, negative_img_batch_2))
 
-            else:
-                # Select the batch based on the top img loss examples
-                anchor_img_batch = anchor_img_batch[img_batch_permutation]
-                positive_annotation_batch = positive_annotation_batch[img_batch_permutation]
-                negative_annotation_batch = negative_annotation_batch[img_batch_permutation]
-                
-                anchor_annotation_batch = anchor_annotation_batch[img_batch_permutation]
-                positive_img_batch = positive_img_batch[img_batch_permutation]
-                negative_img_batch = negative_img_batch[img_batch_permutation]
-            
-            ## Try to find which images are used as input to the network ##
-            #triplet_img_batch = self.order_triplets(image_triplets, img_batch_permutation)
-            #img_loss = np.array(img_loss)
-            #self.image_stat(triplet_img_batch)
+            # Select top img losses, to put in to batch
+            batch_loss_permutation = np.argsort(batch_loss)[-self.training_samples_per_batch:]
+
+            anchor_img_batch = anchor_img_batch[batch_loss_permutation]
+            positive_annotation_batch = positive_annotation_batch[batch_loss_permutation]
+            negative_annotation_batch = negative_annotation_batch[batch_loss_permutation] 
+            anchor_annotation_batch = anchor_annotation_batch[batch_loss_permutation]
+            positive_img_batch = positive_img_batch[batch_loss_permutation]
+            negative_img_batch = negative_img_batch[batch_loss_permutation]
             
             # Increase batch number
             self.batch_nr += 1

@@ -16,7 +16,6 @@ IMAGE_EXTENSION = '../Flicker8k_Images/'
 IMG_HEIGHT = 224
 IMG_WIDTH = 224
 
-###### HAS TO BE REDONE TO FIT WITH NEW MODEL, ADD BRAND ENCODING #####
 
 class evaluate_acc:
 
